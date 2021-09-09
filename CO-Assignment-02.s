@@ -1,8 +1,7 @@
 
 .text
     output: .asciz "So the result is %ld.\n"
-    inputbase: .asciz "Please give me a non-negative base nunber:\n"
-    inputxponent: .asciz "Please give me a non-negative exponent:\n"
+    inputbase: .asciz "Please give me a nunber:\n"
     formatstr: .asciz "%ld"
 
 
@@ -23,7 +22,7 @@ inout:
     call scanf
 
     # calculate factorial
-    pushq -16(%rbp)   # pass base variable
+    pushq -16(%rbp)   # pass variable
     call factorial
 
     # print result
