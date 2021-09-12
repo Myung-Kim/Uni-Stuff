@@ -29,7 +29,7 @@ decode:
 
 	# your code goes here
 start:
-	movq $0, %rcx
+	# movq $0, %rcx
 	movq (%rdi), %rcx
 	movb %cl, character		# move char to memory
 	shr $8, %rcx			# bit shift to point to the amount
@@ -42,7 +42,7 @@ ploop:						# printing loop
 	cmpq $0, amount
 	jle next				# jump to 'next' section to get next memory block position
 	movq $0, %rax
-	movq $0, %rdi			# fill it wiht zeros ???
+	# movq $0, %rdi			# fill it wiht zeros ???
     movq $character, %rdi	# pass the char address
     call printf
 	decq amount				# decrease the amount
@@ -51,8 +51,8 @@ next:
 	cmpl $0, position		# check if is is the last position
 	je end
 
-	movq $0, %rcx
-	movl position, %ecx
+	# movq $0, %rcx
+	movq position, %rcx
 	leaq MESSAGE(, %rcx, 8), %rdi	# get next address
 
 	jmp start
