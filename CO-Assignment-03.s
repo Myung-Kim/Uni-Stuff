@@ -48,7 +48,7 @@ ploop:						# printing loop
 	decq amount				# decrease the amount
 	jmp ploop				# jump to printing loop
 next:
-	cmpl $0, position		# check if is is the last position
+	cmpq $0, position		# check if is is the last position
 	je end
 
 	# movq $0, %rcx
@@ -75,4 +75,3 @@ main:
 	popq	%rbp			# restore base pointer location
 	movq	$0, %rdi		# load program exit code
 	call	exit			# exit the program
-
