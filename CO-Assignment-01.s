@@ -1,3 +1,8 @@
+# ************************************************************
+# Program: power                                             *
+# Description: calculate power of a number based on user     *
+#              input                                         *
+# ************************************************************
 
 
 .text
@@ -6,84 +11,98 @@
     inputxponent: .asciz "Please give me a non-negative exponent:\n"
     formatstr: .asciz "%ld"
 
-
+# ************************************************************
+# Subroutine: inout                                          *
+# Description: get input from user and print the result      *
+#               the result is the power of the input         *                                           *
+#                                                            *
+# Parameters:                                                *
+#   first: takes no parameters                               *
+#   return: no return value                                  *
+# ************************************************************
 inout:
     pushq %rbp  # prologue
     movq %rsp, %rbp
 
-    # base number input prompt
-    movq $0, %rax
-    movq $inputbase, %rdi
+    # prompt for entering base number
+    movq $0, %rax                   # no vector registers for printf
+    movq $inputbase, %rdi           # pass the format string address to printf
     call printf
 
     # base number input
-    movq $0, %rax
-    subq $16, %rsp  # make space for two variables
-    leaq -8(%rbp), %rsi # base
-    movq $formatstr, %rdi
+    movq $0, %rax                   # no vector registers for scanf
+    subq $16, %rsp                  # make space for two variables
+    leaq -8(%rbp), %rsi             # pass the address to store the scanned input
+    movq $formatstr, %rdi           # pass the format string address to scanf
     call scanf
-    # exponent number input prompt
-    movq $0, %rax   # base number input prompt
-    mov $inputxponent, %rdi
+
+    # prompt for entering exponent number
+    movq $0, %rax                   # no vector registers for printf
+    mov $inputxponent, %rdi         # pass the format string address to printf
     call printf
+
     # exponent number input
-    movq $0, %rax
-    leaq -16(%rbp), %rsi
-    movq $formatstr, %rdi
+    movq $0, %rax                   # no vector registers for printf
+    leaq -16(%rbp), %rsi            # pass the address to store the scanned input
+    movq $formatstr, %rdi           # pass the format string address to scanf
     call scanf
 
     # calculate power
-    movq -16(%rbp), %rsi   # pass exponent variable
-    movq -8(%rbp), %rdi   # pass base variable
-    call pow
+    movq -16(%rbp), %rsi            # pass exponent variable
+    movq -8(%rbp), %rdi             # pass base variable
+    call pow                        # call subroutine pow to calculate power
 
 
     # print result
-    movq %rax, %rsi # put the result from %rax to %rsi for printing
-    movq $output, %rdi  # the format string
-    movq $0, %rax   # no vector registers
+    movq %rax, %rsi                 # put the result from %rax to %rsi for printing
+    movq $output, %rdi              # pass the format string address
+    movq $0, %rax                   # no vector registers
     call printf
 
     # epilogue
     movq %rbp, %rsp
     popq %rbp
-    ret
+    ret                             # return to main
 
 
+# ************************************************************
+# Subroutine: pow                                            *
+# Description: cal culate power                              *
+#                                                            *
+# Parameters:                                                *
+#   first: base number                                       *
+#   second: exponent number                                  *
+#   return: returns the result                               *
+# ************************************************************
 pow:
-    # probably not necessary #prologue
-    push %rbp
+    push %rbp                       # prologue
     movq %rsp, %rbp
 
-    movq $1, %rax   # the sum
+    movq $1, %rax                   # the sum
 
 powerloop:
-    cmpq $0, %rsi   # compare exponent to 1
-    jle end
-    imulq %rdi, %rax # calculate power
-    decq %rsi   # derement exponent
-    jmp powerloop
+    cmpq $0, %rsi                   # compare exponent to 1
+    jle end                         # if less or equalt to 0 jump to end
+    imulq %rdi, %rax                # if not calculate the power
+    decq %rsi                       # derement exponent
+    jmp powerloop                   # repeat the process
 
 end:
-    # epilogue, exit the loop
-    movq %rbp , %rsp
+    movq %rbp , %rsp                # epilogue, exit the loop
     popq %rbp
-    ret
+    ret                             # return to inout subroutine
 
 
 .global main
 main:
-    pushq %rbp  # prologue
+    pushq %rbp                      # prologue
     movq %rsp, %rbp
 
-    call inout # call the inout function to get input and calculate the exponent.
+    call inout                      # call the inout function to get input from user and calculate the exponent.
 
-    # epilogue, stop the program
-    movq %rbp, %rsp
+    movq %rbp, %rsp                 # epilogue, before stopping the program
     popq %rbp
 
-    movq $0, %rdi
-    call exit
-
-
+    movq $0, %rdi                   # pass the exit code
+    call exit                       # exit this program
 
