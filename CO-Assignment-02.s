@@ -1,74 +1,80 @@
+# ************************************************************
+# Program: factorial                                         *
+# Description: calculate factorial according to the user     *
+#              input                                         *
+# ************************************************************
 
 .text
     output: .asciz "So the result is %ld.\n"
     inputbase: .asciz "Please give me a nunber:\n"
     formatstr: .asciz "%ld"
+    hellostring: .asciz "names: Mingyi Jin, Yanzhi Chen NedIDs: mingyijin, tomchen\n"
 
 
-inout:
-    pushq %rbp  # prologue
-    movq %rsp, %rbp
-
-    # base number input prompt
-    movq $0, %rax
-    movq $inputbase, %rdi
-    call printf
-
-    # base number input
-    subq $16, %rsp  # make space for one variable
-    movq $0, %rax
-    leaq -16(%rbp), %rsi # base # it is 16 because we pushed rbp in the beginning of main??
-    movq $formatstr, %rdi
-    call scanf
-
-    # calculate factorial
-    pushq -16(%rbp)   # pass variable
-    call factorial
-
-    # print result
-    movq %rax, %rsi # put the result from %rax to %rsi for printing
-    movq $output, %rdi  # the format string
-    movq $0, %rax   # no vector registers
-    call printf
-
-    # epilogue
-    movq %rbp, %rsp
-    popq %rbp
-    ret
-
+# ************************************************************
+# Subroutine: factorial                                      *
+# Description: calculate factorial                           *
+#                                                            *
+# Parameters:                                                *
+#   first: input number                                      *
+#   return: returns the result                               *
+# ************************************************************
 factorial:
     # probably not necessary #prologue
     push %rbp
     movq %rsp, %rbp
 
-    movq 16(%rbp), %rax   # the current number
+    movq 16(%rbp), %rax         # get the value from this stack position
     cmpq $1, %rax
-    je endfac
+    jle endfac                  # end this line if rax is equal or less than 1
 
-    decq %rax   # decrease the nunber
-    pushq %rax  # push the decreased value to the stack to pass the value to inner subroutine
+    decq %rax                   # decrement the nunber
+    pushq %rax                  # push the dcremented value to the stack to pass the value to recursive subroutine
     call factorial
-    addq $8, %rsp   # clear the pushed decreased value
-    imulq 16(%rbp), %rax    # current number multiply all the other factorial sum
-
-
+    addq $8, %rsp               # clear the pushed decremented value
+    imulq 16(%rbp), %rax        # current number multiply all the other factorial sum
 
 
 endfac:
-    # epilogue, exit the loop
+    # epilogue
     movq %rbp , %rsp
     popq %rbp
     ret
 
 
+
 .global main
 main:
-    pushq %rbp  # prologue
+    pushq %rbp                          # prologue
     movq %rsp, %rbp
 
-    call inout # call the inout function to get input and calculate the exponent.
+    movq $0, %rax                       # no vector registers for printf
+    movq $hellostring, %rdi             # print hello string
+    call printf
 
-    # epilogue, stop the program
+    # base number input prompt
+    movq $0, %rax                        # no vector registers for printf
+    movq $inputbase, %rdi                # print input prompt
+    call printf
+
+    # base number input
+    subq $16, %rsp                       # make space for one variable
+    movq $0, %rax                        # no vector registers
+    leaq -16(%rbp), %rsi                 # pass the address where the input should be stored
+    movq $formatstr, %rdi
+    call scanf
+
+    # calculate factorial
+    pushq -16(%rbp)                     # pass variable to subroutine
+    call factorial
+
+    # print result
+    movq %rax, %rsi                     # put the result from %rax to %rsi for printing
+    movq $output, %rdi                  # the format string
+    movq $0, %rax                       # no vector registers
+    call printf
+
+    # epilogue
     movq %rbp, %rsp
     popq %rbp
 
