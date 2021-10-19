@@ -4,12 +4,14 @@
 	position: .quad 0x0000000000000000
     bgcolor: .quad 0x0000000000000000
     fgcolor: .quad 0x0000000000000000
+	effect:	 .quad 0x0000000000000000
 
 .include "final.s"
 .text
 	formatstr: .asciz "%c"
 	output: .asciz "\033[38;5;%ld;48;5;%ldm%c"		# without special effect
 	soutput: .asciz "\033[%ldm%c"							# with effect
+	# soutput: .asciz "\033[4m%c\033[0m"
 	coutput: .asciz "\033[0m"
 
 #  to reset
@@ -33,7 +35,7 @@ decode:
 	movq 	%rdi, %r12		# move MESSAGE address to r12
 
 	# your code goes here
-start:
+decode_start:
 	# movq $0, %rcx
 	movq (%rdi), %rcx
 	movb %cl, character		# move char to memory
@@ -49,7 +51,7 @@ start:
 ploop:						# printing loop
 
 	cmpq $0, amount			# check how many times need to be printed
-	jle next				# jump to 'next' section to get next memory block position
+	je next				# jump to 'next' section to get next memory block position
 	movq bgcolor, %rdx		# move background color for compare??????
 	cmpq %rdx, fgcolor		# compare foreground and background color
 	je addeffect			# if colors are equal, jump to add special effects
@@ -70,32 +72,35 @@ addeffect:
 	je eff_reveal
 	cmpq	$182, fgcolor	# blink
 	je eff_blink
+	# jmp eff_underline		# undifined effect !!!!!!!!???????
 
 
 eff_reset:
-	movq 	$0,   fgcolor
+	movq 	$0,   effect 		# reset 0
 	jmp	add_eff_end
 eff_blink_off:
-	movq 	$25,  fgcolor
+	movq 	$25,  effect		# blink off 25
 	jmp add_eff_end
 eff_bold:
-	movq	$1,   fgcolor
+	movq	$1,   effect		# bold 1
 	jmp add_eff_end
 eff_faint:
-	movq	$2,   fgcolor
+	movq	$2,   effect		# faint 2
 	jmp add_eff_end
 eff_conceal:
-	movq	$8,   fgcolor		# conceal $8
+	movq	$8,   effect		# conceal $8
 	jmp add_eff_end
 eff_reveal:
-	movq	$28,  fgcolor		# reveal $28
+	movq	$28,  effect		# reveal $28
 	jmp add_eff_end
 eff_blink:
-	movq	$5,   fgcolor	# fall through
+	movq	$5,   effect		# blink 5
+	jmp add_eff_end
+
 
 add_eff_end:
-	movq fgcolor, %rdx
-	movq character, %rsi
+	movq character, %rdx
+	movq effect, %rsi		# effect
 	movq $soutput, %rdi		# format string for special effect
 	jmp callprint			# jump to skip no effect printing section
 
@@ -117,7 +122,7 @@ next:
 	movq position, %rcx
 	leaq (%r12, %rcx, 8), %rdi	# get next address
 
-	jmp start
+	jmp decode_start
 
 
 
